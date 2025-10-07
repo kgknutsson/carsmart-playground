@@ -10,7 +10,7 @@ function App() {
     try {
       setLoading(true)
       setError(null)
-      const res = await fetch('/api/hello')
+      const res = await fetch('/rest/controller/hello')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const text = await res.text()
       setHello(text)

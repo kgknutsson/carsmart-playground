@@ -7,7 +7,7 @@ export default defineConfig({
     server: {
         proxy: {
             // Proxy API calls during development to the Spring Boot backend
-            '/rest': {
+            '/recipes': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
                 secure: false,

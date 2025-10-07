@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 // Types aligned with backend RecipeController
@@ -20,17 +20,13 @@ function App() {
 
   // Form state
   const [description, setDescription] = useState('')
-  const [ingredientsText, setIngredientsText] = useState('') // comma separated
+  const [ingredients, setIngredients] = useState<string[]>([''])
   const [editingId, setEditingId] = useState<number | null>(null)
 
-  const ingredientsArray = useMemo(
-    () => ingredientsText.split(',').map(s => s.trim()).filter(Boolean),
-    [ingredientsText]
-  )
 
   const resetForm = () => {
     setDescription('')
-    setIngredientsText('')
+    setIngredients([''])
     setEditingId(null)
   }
 
@@ -57,7 +53,7 @@ function App() {
     e.preventDefault()
     const payload: RecipeRequest = {
       description: description.trim(),
-      ingredients: ingredientsArray,
+      ingredients: ingredients.map(s => s.trim()).filter(Boolean),
     }
     if (!payload.description) {
       setError('Description is required')
@@ -88,7 +84,7 @@ function App() {
   const onEdit = (r: Recipe) => {
     setEditingId(r.id)
     setDescription(r.description)
-    setIngredientsText(r.ingredients.join(', '))
+    setIngredients(r.ingredients.length ? r.ingredients : [''])
   }
 
   const onDelete = async (id: number) => {
@@ -116,31 +112,65 @@ function App() {
 
       <form onSubmit={onSubmit} style={{ marginBottom: 24 }}>
         <h2>{editingId ? 'Edit recipe' : 'Add a new recipe'}</h2>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
           <input
             type="text"
             placeholder="Description"
             value={description}
             onChange={e => setDescription(e.target.value)}
             disabled={loading}
-            style={{ flex: 2, minWidth: 240 }}
+            style={{ width: '100%', minWidth: 240 }}
           />
-          <input
-            type="text"
-            placeholder="Ingredients (comma separated)"
-            value={ingredientsText}
-            onChange={e => setIngredientsText(e.target.value)}
-            disabled={loading}
-            style={{ flex: 3, minWidth: 280 }}
-          />
-          <button type="submit" disabled={loading}>
-            {editingId ? 'Update' : 'Create'}
-          </button>
-          {editingId && (
-            <button type="button" onClick={resetForm} disabled={loading}>
-              Cancel
+          <div style={{ minWidth: 280 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: 12, color: '#444' }}>Ingredients</label>
+              <button
+                type="button"
+                onClick={() => setIngredients([...ingredients, ''])}
+                disabled={loading}
+                title="Add ingredient"
+              >
+                Add
+              </button>
+            </div>
+            {ingredients.map((ing, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+                <input
+                  type="text"
+                  placeholder={`Ingredient #${idx + 1}`}
+                  value={ing}
+                  onChange={e => {
+                    const next = [...ingredients]
+                    next[idx] = e.target.value
+                    setIngredients(next)
+                  }}
+                  disabled={loading}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = ingredients.filter((_, i) => i !== idx)
+                    setIngredients(next.length ? next : [''])
+                  }}
+                  disabled={loading}
+                  title="Remove ingredient"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="submit" disabled={loading}>
+              {editingId ? 'Update' : 'Create'}
             </button>
-          )}
+            {editingId && (
+              <button type="button" onClick={resetForm} disabled={loading}>
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       </form>
 

@@ -1,4 +1,5 @@
 import { useQuery } from 'react-query'
+import { Container, Typography, Alert, Button, CircularProgress, List, ListItem, ListItemText, Box } from '@mui/material'
 
 // Types aligned with backend RecipeController
 interface Recipe {
@@ -33,41 +34,49 @@ function App() {
   })
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Recipes</h1>
+    <Container maxWidth="md" sx={{ py: 2 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Recipes
+      </Typography>
+
       {isLoading && (
-        <p className="text-gray-600">Loading recipes…</p>
+        <Box display="flex" alignItems="center" gap={2} my={2}>
+          <CircularProgress size={24} />
+          <Typography color="text.secondary">Loading recipes…</Typography>
+        </Box>
       )}
 
       {isError && (
-        <div className="bg-red-50 text-red-700 p-3 rounded border border-red-200 mb-3">
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={() => refetch()}>
+              Retry
+            </Button>
+          }
+          sx={{ mb: 2 }}
+        >
           Error loading recipes: {error?.message}
-          <button
-            onClick={() => refetch()}
-            className="ml-3 px-3 py-1 bg-red-600 text-white rounded"
-          >
-            Retry
-          </button>
-        </div>
+        </Alert>
       )}
 
       {recipes && recipes.length === 0 && (
-        <p>No recipes yet.</p>
+        <Typography>No recipes yet.</Typography>
       )}
 
       {recipes && recipes.length > 0 && (
-        <ul className="space-y-3">
+        <List>
           {recipes.map((r: Recipe) => (
-            <li key={r.id} className="p-3 border rounded">
-              <div className="font-medium">#{r.id} — {r.description}</div>
-              <div className="text-sm text-gray-600">
-                Ingredients: {r.ingredients.join(', ')}
-              </div>
-            </li>
+            <ListItem key={r.id} divider>
+              <ListItemText
+                primary={`#${r.id} — ${r.description}`}
+                secondary={`Ingredients: ${r.ingredients.join(', ')}`}
+              />
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
-    </div>
+    </Container>
   )
 }
 

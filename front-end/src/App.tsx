@@ -103,8 +103,8 @@ function App() {
   }
 
   return (
-    <div className="App" style={{ maxWidth: 800, margin: '0 auto', padding: 16 }}>
-      <h1>Recipes</h1>
+    <div className="App max-w-3xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Recipes</h1>
 
       {error && (
         <div style={{ color: 'salmon', marginBottom: 12 }}>Error: {error}</div>

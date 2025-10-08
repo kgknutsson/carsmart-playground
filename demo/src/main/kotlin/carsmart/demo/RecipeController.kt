@@ -1,6 +1,7 @@
 package carsmart.demo
 
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -27,14 +28,22 @@ class RecipeController {
     private val store = ConcurrentHashMap<Long, Recipe>()
     private val idSeq = AtomicLong(1)
 
-    @GetMapping
+    init {
+        store[1] = Recipe(1, "Pasta", listOf("tomato", "pasta"))
+        store[2] = Recipe(2, "Rice", listOf("rice", "oil"))
+        store[3] = Recipe(3, "Noodles", listOf("noodles", "pasta"))
+        store[4] = Recipe(4, "Spaghetti", listOf("spaghetti", "pasta"))
+        store[5] = Recipe(5, "Cat Food", listOf("Can of cat food", "clams", "truffles"))
+    }
+
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun listAll(): List<Recipe> = store.values.sortedBy { it.id }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getById(@PathVariable id: Long): ResponseEntity<Recipe> =
         store[id]?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
 
-    @PostMapping
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun create(@RequestBody req: RecipeRequest): ResponseEntity<Recipe> {
         if (req.description.isBlank()) return ResponseEntity.badRequest().build()
         val id = idSeq.getAndIncrement()
@@ -47,7 +56,7 @@ class RecipeController {
         return ResponseEntity.created(URI.create("/recipes/$id")).body(recipe)
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun update(@PathVariable id: Long, @RequestBody req: RecipeRequest): ResponseEntity<Recipe> {
         val existing = store[id] ?: return ResponseEntity.notFound().build()
         if (req.description.isBlank()) return ResponseEntity.badRequest().build()
